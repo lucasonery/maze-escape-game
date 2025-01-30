@@ -1,0 +1,14 @@
+{
+  "name": "maze-escape",
+  "version": "1.0.0",
+  "description": "Maze Escape em WebGL com Three.js",
+  "scripts": {
+    "start": "live-server" 
+  },
+  "dependencies": {
+    "three": "^0.152.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

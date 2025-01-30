@@ -1,0 +1,29 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Evita scroll */
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+#gameContainer {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* HUD minimalista */
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 999;
+    color: #fff;
+}
+
+#hud span {
+    display: inline-block;
+    margin-right: 15px;
+}

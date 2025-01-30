@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
     <title>Maze Escape</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Se estiver usando Three.js via CDN, inclua a linha abaixo:
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script> -->
 </head>
+
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script src="./js/libs/gl-matrix-min.js"></script>
-    <script type="module" src="./js/maze_escape_webgl.js"></script>
+    <div id="gameContainer"></div>
+
+    <!-- Scripts do jogo -->
+    <script type="module" src="node_modules/three/build/three.min.js"></script> <!-- Se estiver usando via npm -->
+    <script type="module" src="main.js"></script>
+    <script type="module" src="src/scripts/game.js"></script>
+    <script type="module" src="src/scripts/player.js"></script>
+    <script type="module" src="src/scripts/enemy.js"></script>
+    <script type="module" src="src/scripts/maze.js"></script>
+    <script type="module" src="src/scripts/ui.js"></script>
+
+    <!-- Você também pode carregar seus shaders de forma dinâmica ou inline. -->
 </body>
+
 </html>
