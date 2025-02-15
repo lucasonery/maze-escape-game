@@ -42,36 +42,71 @@ const uniformLocations = {
 };
 
 // Carrega a textura para as paredes do labirinto
-const wallTexture = loadTexture(gl, "assets/textures/wall.jpg");
+const wallTexture = loadTexture(gl, "assets/textures/wall.png");
 
 // Cria instâncias do labirinto, jogador e gerenciamento do jogo
 const maze = new Maze();
 const player = new Player();
 const game = new Game(maze, player);
 
-// Prepara os buffers para o cubo (que representa as paredes)
-// Criação dos buffers para o cubo (labirinto)
+// ******************
+// Buffers e dados do cubo (paredes do labirinto)
+// ******************
 const cubeData = createCube(1);
 
+// Buffer de posições para as paredes
 const wallPositionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, wallPositionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, cubeData.positions, gl.STATIC_DRAW);
 
+// Buffer de normais para as paredes
 const wallNormalBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, wallNormalBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, cubeData.normals, gl.STATIC_DRAW);
 
+// Buffer de coordenadas de textura para as paredes
 const wallTexCoordBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, wallTexCoordBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, cubeData.texCoords, gl.STATIC_DRAW);
 
+// Buffer de índices para as paredes
 const wallIndexBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
 gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cubeData.indices, gl.STATIC_DRAW);
 
+// ******************
+// Buffers e textura para o chão do labirinto
+// ******************
+// define dimensões do chão com base no tamanho do labirinto
+const floorWidth = maze.grid[0].length;
+const floorHeight = maze.grid.length;
+const floorData = createPlane(floorWidth, floorHeight);
+
+// Buffer de posições para o chão
+const floorPositionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, floorPositionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, floorData.positions, gl.STATIC_DRAW);
+
+// Buffer de normais para o chão
+const floorNormalBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, floorNormalBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, floorData.normals, gl.STATIC_DRAW);
+
+// Buffer de coordenadas de textura para o chão
+const floorTexCoordBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, floorTexCoordBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, floorData.texCoords, gl.STATIC_DRAW);
+
+// Buffer de índices para o chão
+const floorIndexBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, floorData.indices, gl.STATIC_DRAW);
+
+const floorTexture = loadTexture(gl, "assets/textures/wall1.jpg");
+
 // Função para atualizar a câmera para acompanhar o jogador
 function updateCamera() {
-  const cameraOffset = [0, 2, 5]; // Ajuste conforme desejado
+  const cameraOffset = [0, 3, 3]; // Ajuste conforme desejado
   const cameraPos = [
     player.position[0] + cameraOffset[0],
     player.position[1] + cameraOffset[1],
@@ -125,11 +160,52 @@ function renderMaze() {
     gl.uniform1i(uniformLocations.uSampler, 0);
     
     // Define uma direção de luz (exemplo simples)
-    gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 3]);
+    gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 100]);
     
     // Desenha o cubo (paredes)
     gl.drawElements(gl.TRIANGLES, cubeData.indices.length, gl.UNSIGNED_SHORT, 0);
   });
+}
+
+function renderFloor() {
+    mat4.identity(modelMatrix);
+    
+    // posicionar o chão no centro do labirinto
+    // o ultimo parametro 
+    mat4.translate(modelMatrix, modelMatrix, [floorWidth / 2 - 0.5, -0.30, floorHeight / 2 - 0.5]);
+
+    // Envia as matrizes para o shader
+    gl.uniformMatrix4fv(uniformLocations.modelMatrix, false, modelMatrix);
+    gl.uniformMatrix4fv(uniformLocations.viewMatrix, false, viewMatrix);
+    gl.uniformMatrix4fv(uniformLocations.projMatrix, false, projMatrix);
+
+    // Atributos de posição
+    gl.bindBuffer(gl.ARRAY_BUFFER, floorPositionBuffer);
+    gl.vertexAttribPointer(attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribLocations.vertexPosition);
+
+    // Atributos de normais
+    gl.bindBuffer(gl.ARRAY_BUFFER, floorNormalBuffer);
+    gl.vertexAttribPointer(attribLocations.vertexNormal, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribLocations.vertexNormal);
+
+    // Atributos de coordenadas de textura
+    gl.bindBuffer(gl.ARRAY_BUFFER, floorTexCoordBuffer);
+    gl.vertexAttribPointer(attribLocations.textureCoord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribLocations.textureCoord);
+
+    // Vincula o buffer de índices e a textura
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+    gl.uniform1i(uniformLocations.uSampler, 0);
+
+    // Define uma direção de luz (exemplo simples)
+    gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 100]);
+
+    // Desenha o chão
+    gl.drawElements(gl.TRIANGLES, floorData.indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
 // Função para renderizar o jogador (a esfera)
@@ -144,7 +220,7 @@ function renderPlayer() {
   
   // Chame a função de desenho da esfera do jogador, se estiver implementada
   // Exemplo: player.draw(gl, shaderProgram, viewMatrix, projMatrix);
-  gl.drawElements(gl.TRIANGLES, cubeData.indices.length, gl.UNSIGNED_SHORT, 0);
+  player.draw(gl, shaderProgram, viewMatrix, projMatrix);
 }
 
 // Loop principal de renderização
@@ -158,6 +234,7 @@ function render() {
   game.update();
   
   // Renderiza o labirinto e o jogador
+  renderFloor();
   renderMaze();
   renderPlayer();
   

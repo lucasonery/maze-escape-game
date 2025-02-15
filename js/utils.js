@@ -75,7 +75,7 @@ function compileShader(gl, shaderSource, shaderType) {
   // Função para gerar os dados de um cubo com normais e coordenadas de textura
   function createCube(size) {
     const half = size / 2;
-    
+
     // Definindo vértices para cada face (cada face terá seus próprios vértices para garantir normais corretas)
     const positions = [
       // Frente
@@ -109,7 +109,7 @@ function compileShader(gl, shaderSource, shaderType) {
       -half,  half,  half,
       -half,  half, -half,
     ];
-    
+
     // Normais para cada face
     const normals = [
       // Frente (normal apontando para +Z)
@@ -143,7 +143,7 @@ function compileShader(gl, shaderSource, shaderType) {
       -1, 0, 0,
       -1, 0, 0,
     ];
-    
+
     // Coordenadas de textura para cada face (cada face: (0,0), (1,0), (1,1), (0,1))
     const texCoords = [
       // Frente
@@ -177,7 +177,7 @@ function compileShader(gl, shaderSource, shaderType) {
       1, 1,
       0, 1,
     ];
-    
+
     // Índices para cada face (2 triângulos por face)
     const indices = [
       0, 1, 2,    0, 2, 3,     // Frente
@@ -187,6 +187,48 @@ function compileShader(gl, shaderSource, shaderType) {
      16,17,18,   16,18,19,     // Direito
      20,21,22,   20,22,23      // Esquerdo
     ];
+
+    return {
+      positions: new Float32Array(positions),
+      normals: new Float32Array(normals),
+      texCoords: new Float32Array(texCoords),
+      indices: new Uint16Array(indices)
+    };
+  }
+
+  // Função para gerar os dados de um plano
+  function createPlane(width, height) {
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    // O plano está no eixo XZ, com Y fixo em 0
+    const positions = [
+      -halfWidth, 0, -halfHeight,
+       halfWidth, 0, -halfHeight,
+       halfWidth, 0,  halfHeight,
+      -halfWidth, 0,  halfHeight,
+    ];
+    
+    // Normais apontando para cima (eixo Y)
+    const normals = [
+      0, 1, 0,
+      0, 1, 0,
+      0, 1, 0,
+      0, 1, 0,
+    ];
+    
+    // Coordenadas de textura (mapear toda a textura no plano)
+    const texCoords = [
+      0, 0,
+      1, 0,
+      1, 1,
+      0, 1,
+    ];
+    
+    // Índices para os dois triângulos do plano
+    const indices = [
+      0, 1, 2,
+      0, 2, 3
+    ];
     
     return {
       positions: new Float32Array(positions),
@@ -195,6 +237,7 @@ function compileShader(gl, shaderSource, shaderType) {
       indices: new Uint16Array(indices)
     };
   }
+
 
   
   // Função para carregar uma textura a partir de uma URL e configurá-la para uso no WebGL
@@ -215,6 +258,7 @@ function compileShader(gl, shaderSource, shaderType) {
   
     // Carrega a imagem da textura
     const image = new Image();
+    image.crossOrigin = "anonymous";
     image.onload = function() {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
