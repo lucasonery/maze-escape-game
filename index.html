@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Maze Escape</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+</head>
+<body>
+  <canvas id="glCanvas" width="800" height="600"></canvas>
+
+  <!-- Shaders embutidos -->
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec3 aPosition;
+    attribute vec3 aNormal;
+    attribute vec2 aTexCoord;
+
+    uniform mat4 uModelMatrix;
+    uniform mat4 uViewMatrix;
+    uniform mat4 uProjMatrix;
+
+    varying vec3 vFragPos;
+    varying vec3 vNormal;
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
+      vFragPos = worldPos.xyz;
+      // Transforma a normal considerando apenas rotação e escala
+      vNormal = mat3(uModelMatrix) * aNormal;
+      vTexCoord = aTexCoord;
+      
+      gl_Position = uProjMatrix * uViewMatrix * uModelMatrix * vec4(aPosition, 1.0);
+    }
+  </script>
+
+  <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec3 vFragPos;
+    varying vec3 vNormal;
+    varying vec2 vTexCoord;
+
+    uniform sampler2D uSampler;
+    uniform vec3 uLightPosition;
+
+    void main() {
+      // Calcula a direção da luz a partir do fragmento até a posição da luz
+      vec3 lightDir = normalize(uLightPosition - vFragPos);
+      // Cálculo da iluminação difusa (Lei de Lambert)
+      float diff = max(dot(normalize(vNormal), lightDir), 0.0);
+      // Fator ambiente para garantir que a cena não fique totalmente escura
+      float ambient = 0.3;
+      
+      vec4 texColor = texture2D(uSampler, vTexCoord);
+      vec3 result = (ambient + diff) * texColor.rgb;
+      gl_FragColor = vec4(result, texColor.a);
+    }
+  </script>
+
+  <!-- Inclusão dos arquivos JavaScript -->
+  <script src="js/utils.js"></script>
+  <script src="js/maze.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
