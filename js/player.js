@@ -4,6 +4,9 @@ class Player {
       this.position = [1, 0, 1.5];
       // Velocidade de movimento
       this.speed = 0.1;
+
+      // Rotação do jogador (em radianos)
+      this.rotation = 0;
       // Cria a geometria da esfera para representar o jogador
       // (Utilizando a função createSphere definida em utils.js)
       this.geometry = createSphere(0.30, 20, 20);
@@ -12,23 +15,29 @@ class Player {
     // Método para mover o jogador, verificando colisões com o labirinto
     move(direction, maze) {
       let newPos = [...this.position];
+      let newRotation = this.rotation;
       switch (direction) {
         case 'up':
           newPos[2] -= this.speed;
+          newRotation = 0; //olhando para -z
           break;
         case 'down':
           newPos[2] += this.speed;
+          newRotation = Math.PI; //olhando para +z
           break;
         case 'left':
           newPos[0] -= this.speed;
+          newRotation = Math.PI / 2; //olhando para -x
           break;
         case 'right':
           newPos[0] += this.speed;
+          newRotation = -Math.PI / 2; //olhando para +x
           break;
       }
       // Verifica se a nova posição colide com uma parede do labirinto
       if (!maze.isColliding(newPos[0], newPos[2], 0.3)) {
         this.position = newPos;
+        this.rotation = newRotation;
       }
     }
     

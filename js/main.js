@@ -104,18 +104,45 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, floorData.indices, gl.STATIC_DRAW);
 
 const floorTexture = loadTexture(gl, "assets/textures/wall1.jpg");
 
-// Função para atualizar a câmera para acompanhar o jogador
-function updateCamera() {
-  const cameraOffset = [0, 3, 3]; // Ajuste conforme desejado
-  const cameraPos = [
-    player.position[0] + cameraOffset[0],
-    player.position[1] + cameraOffset[1],
-    player.position[2] + cameraOffset[2]
-  ];
-  const target = player.position;
-  const up = [0, 1, 0];
-  mat4.lookAt(viewMatrix, cameraPos, target, up);
+// Função auxiliar que retorna uma posição válida para a câmera
+// Ela percorre a reta entre playerPos e desiredPos, e verifica se há colisão com as paredes do labirinto
+// cameraRadius define um buffer para câmera -> 0.2
+function computeValidCameraPosition(playerPos, desiredPos, maze, cameraRadius) {
+  let validPos = vec3.create();
+  // começamos com a posição desejada e vamos retrocedendo até encontrar uma posição válida
+  // usamos t = 1 para começar na posição desejada
+  for (let t = 1; t >= 0; t -= 0.05) {
+    vec3.lerp(validPos, playerPos, desiredPos, t);
+    // verifica colisão usando projeção no plano XZ
+    if (!maze.isColliding(validPos[0], validPos[2], cameraRadius)) {
+      return validPos;
+    }
+  }
+  // Se nenhum ponto for válido, retorna playerPos
+  return playerPos;
 }
+
+function updateCamera() {
+  // Vetor padrão de offset: quando o jogador está com rotation = 0, a câmera fica 2 unidades atrás (no sentido +Z)
+  const defaultOffset = vec3.fromValues(0, 0, 2);
+  
+  // Cria uma matriz de rotação em torno do eixo Y, usando a rotação do jogador
+  let rotationMatrix = mat4.create();
+  mat4.fromYRotation(rotationMatrix, player.rotation);
+  
+  // Aplica a rotação ao vetor offset
+  let rotatedOffset = vec3.create();
+  vec3.transformMat4(rotatedOffset, defaultOffset, rotationMatrix);
+
+  let desiredPos = vec3.create();
+  vec3.add(desiredPos, player.position, rotatedOffset);
+
+  // Calcula uma posição válida para a câmera, evitando que ela fique dentro de paredes
+  let validCameraPos = computeValidCameraPosition(player.position, desiredPos, maze, 0.2);
+  
+  mat4.lookAt(viewMatrix, validCameraPos, player.position, [0, 1, 0]);
+}
+
 
 // Evento de teclado para movimentar o jogador
 document.addEventListener("keydown", (event) => {
@@ -160,7 +187,7 @@ function renderMaze() {
     gl.uniform1i(uniformLocations.uSampler, 0);
     
     // Define uma direção de luz (exemplo simples)
-    gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 100]);
+    // gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 100]);
     
     // Desenha o cubo (paredes)
     gl.drawElements(gl.TRIANGLES, cubeData.indices.length, gl.UNSIGNED_SHORT, 0);
