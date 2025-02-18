@@ -6,6 +6,19 @@ body {
     height: 100vh;
     background-color: #f0f0f0;
   }
+
+  header#gameHeader{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000;
+  }
   
   canvas {
     border: 1px solid #fff;

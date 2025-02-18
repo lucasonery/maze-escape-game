@@ -2,16 +2,26 @@
 
 class Maze {
   constructor() {
-    // Layout simples: 1 = parede, 0 = caminho
+    // Definindo um labirinto 11x11
+    // 1 representa parede e 0 caminho.
+    // Neste exemplo:
+    // - A entrada é definida na primeira linha (linha 0), coluna 1 (valor 0).
+    // - A saída é definida na última linha (linha 10), coluna 9 (valor 0).
     this.grid = [
-      [1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1]
+      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+      [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1],
+      [1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1]
     ];
-    // Cada célula terá tamanho 1 (lado do quadrado)
+    
+    // Cada célula possui um tamanho de 1 unidade.
     this.cellSize = 1;
   }
   

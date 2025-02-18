@@ -1,6 +1,3 @@
-// js/main.js
-
-// Obtém o canvas e inicializa o contexto WebGL
 const canvas = document.getElementById("glCanvas");
 const gl = canvas.getContext("webgl");
 
@@ -38,16 +35,79 @@ const uniformLocations = {
   viewMatrix: gl.getUniformLocation(shaderProgram, "uViewMatrix"),
   projMatrix: gl.getUniformLocation(shaderProgram, "uProjMatrix"),
   uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
-  lightDirection: gl.getUniformLocation(shaderProgram, "uLightPosition")
 };
+
+const livesDisplay = document.getElementById("livesDisplay");
+const timerDisplay = document.getElementById("timerDisplay");
 
 // Carrega a textura para as paredes do labirinto
 const wallTexture = loadTexture(gl, "assets/textures/wall.png");
 
+// carrega textura para jogador (esfera)
+const playerTexture = loadTexture(gl, "assets/textures/player.jpg");
+
 // Cria instâncias do labirinto, jogador e gerenciamento do jogo
 const maze = new Maze();
 const player = new Player();
+player.texture = playerTexture;
 const game = new Game(maze, player);
+
+// Define uma rota fixa para o inimigo (um quadrado no labirinto)
+const enemyRoute = [
+  [3, 0, 3],
+  [7, 0, 3],
+  [7, 0, 7],
+  [5, 0, 7],
+  [5, 0, 5],
+  [3, 0, 5],
+  [3, 0, 7],
+  [1, 0, 7],
+  [1, 0, 3],
+  [3, 0, 3]
+];
+
+// Cria o inimigo passando o contexto gl e a rota
+const enemy = new Enemy(gl, enemyRoute);
+
+const floorWidth = maze.grid[0].length;
+const floorHeight = maze.grid.length;
+
+// ***************
+// Atualizações para multiplas fontes de luz
+// ***************
+
+// uniforms para as luzes
+const uLightPositionsLoc = gl.getUniformLocation(shaderProgram, "uLightPositions");
+const uLightColorsLoc = gl.getUniformLocation(shaderProgram, "uLightColors");
+const uLightRadiiLoc = gl.getUniformLocation(shaderProgram, "uLightRadii");
+
+const lightPositions = [
+  [floorWidth / 2, 4.0, floorHeight / 2], // Luz central, acima do labirinto
+  [2.0, 3.0, 2.0], // Luz 1
+  [floorWidth - 2, 3.0, floorHeight - 2], // Luz 2
+  [floorWidth - 2, 3.0, 2.0], // Luz 3
+  [2.0, 3.0, floorHeight - 2], // Luz 4
+]
+
+const lightColors = [
+  [1.0, 1.0, 1.0], // Luz branca
+  [1.0, 0.0, 0.0], // Luz vermelha
+  [0.0, 0.0, 1.0], // Luz azul
+  [0.0, 1.0, 0.0], // Luz verde
+  [1.0, 1.0, 0.0], // Luz amarela
+]
+
+const lightRadii = [6.0, 4.0, 4.0, 4.0, 4.0];
+
+// função aux para transformar arrays 2D em Float32Array
+function flatten(arr) {
+  return arr.reduce((acc, val) => acc.concat(val), []);
+}
+
+// envia as luzes para o shader
+gl.uniform3fv(uLightPositionsLoc, flatten(lightPositions));
+gl.uniform3fv(uLightColorsLoc, flatten(lightColors));
+gl.uniform1fv(uLightRadiiLoc, lightRadii);
 
 // ******************
 // Buffers e dados do cubo (paredes do labirinto)
@@ -78,8 +138,6 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cubeData.indices, gl.STATIC_DRAW);
 // Buffers e textura para o chão do labirinto
 // ******************
 // define dimensões do chão com base no tamanho do labirinto
-const floorWidth = maze.grid[0].length;
-const floorHeight = maze.grid.length;
 const floorData = createPlane(floorWidth, floorHeight);
 
 // Buffer de posições para o chão
@@ -124,7 +182,7 @@ function computeValidCameraPosition(playerPos, desiredPos, maze, cameraRadius) {
 
 function updateCamera() {
   // Vetor padrão de offset: quando o jogador está com rotation = 0, a câmera fica 2 unidades atrás (no sentido +Z)
-  const defaultOffset = vec3.fromValues(0, 0, 2);
+  const defaultOffset = vec3.fromValues(0, 5, 10);
   
   // Cria uma matriz de rotação em torno do eixo Y, usando a rotação do jogador
   let rotationMatrix = mat4.create();
@@ -259,11 +317,38 @@ function render() {
   
   // Atualiza o estado do jogo (verifica se o jogador chegou na saída)
   game.update();
+
+  // atualiza tempo (em segundos) e exibe no display
+  let elapsedSeconds = Math.floor((Date.now() - game.startTime) / 1000);
+
+  // atualiza HUD
+  livesDisplay.innerText = 'Vidas: ' + game.lives;
+  timerDisplay.innerText = 'Tempo: ' + elapsedSeconds + 's';
   
   // Renderiza o labirinto e o jogador
   renderFloor();
   renderMaze();
   renderPlayer();
+
+  // Atualiza e desenha o inimigo
+  enemy.update();
+  enemy.draw(gl, shaderProgram, viewMatrix, projMatrix);
+  
+  // Verifica colisão entre o jogador e o inimigo:
+  let dx = player.position[0] - enemy.position[0];
+  let dz = player.position[2] - enemy.position[2];
+  let distance = Math.sqrt(dx * dx + dz * dz);
+  // Supondo que ambos têm raio 0.5; colidem se a distância for menor que 1.0
+  if (distance < 1.0) {
+    game.lives--;
+    if (game.lives <= 0) {
+      alert("Game Over");
+      game.gameOver = true;
+    } else {
+      // Reinicia o jogador à posição inicial (entrada do labirinto)
+      player.position = [1, 0, 0];
+    }
+  }
   
   if (!game.gameOver) {
     requestAnimationFrame(render);

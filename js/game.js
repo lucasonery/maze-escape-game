@@ -9,7 +9,7 @@ class Game {
     constructor(maze, player) {
       this.maze = maze;
       this.player = player;
-      this.score = 0;
+      this.lives = 3;
       this.gameOver = false;
       // Define a posição de saída do labirinto (ajuste conforme o layout desejado)
       this.exitPosition = [maze.grid[0].length - 2, 0.5, maze.grid.length - 2];

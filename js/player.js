@@ -1,11 +1,11 @@
 class Player {
     constructor() {
       // Posição inicial ajustada conforme o layout do labirinto
-      this.position = [1, 0, 1.5];
+      this.position = [1, 0, 0];
       // Velocidade de movimento
       this.speed = 0.1;
       // Rotação do jogador (em radianos)
-      this.rotation = 0;
+      this.rotation = Math.PI;
       // Angulo de rolagem do jogador
       this.rollAngle = 0;
       // Cria a geometria da esfera para representar o jogador
@@ -69,23 +69,20 @@ class Player {
     // Aqui você deverá configurar os buffers e enviar as matrizes para os shaders.
     // Este exemplo mostra apenas a preparação da matriz de modelo.
     draw(gl, shaderProgram, viewMatrix, projMatrix) {
-      // Cria a matriz de modelo para posicionar a esfera no mundo
       let modelMatrix = mat4.create();
-      // Posiciona a esfera na posição do jogador
+      // Translada para a posição do jogador
       mat4.translate(modelMatrix, modelMatrix, this.position);
-      // Rotação da esfera
+      // Aplica a rotação (orientação) do jogador
       mat4.rotateY(modelMatrix, modelMatrix, this.rotation);
-      // Rotação de rolagem
-      mat4.rotateX(modelMatrix, modelMatrix, this.rollAngle);
-
+      // Aplica o efeito de rolagem
+      mat4.rotate(modelMatrix, modelMatrix, this.rollAngle, [1, 0, 0]);
       
       // Envia as matrizes para os shaders
       gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uModelMatrix"), false, modelMatrix);
       gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uViewMatrix"), false, viewMatrix);
       gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uProjMatrix"), false, projMatrix);
       
-      // Criação e configuração dos buffers usando os dados da esfera
-      // Buffer de posições
+      // Cria e vincula os buffers para a esfera
       const spherePosBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, spherePosBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, this.geometry.positions, gl.STATIC_DRAW);
@@ -93,7 +90,6 @@ class Player {
       gl.vertexAttribPointer(posLocation, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(posLocation);
       
-      // Buffer de normais
       const sphereNormalBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, sphereNormalBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, this.geometry.normals, gl.STATIC_DRAW);
@@ -101,7 +97,6 @@ class Player {
       gl.vertexAttribPointer(normLocation, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(normLocation);
       
-      // Buffer de coordenadas de textura
       const sphereTexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, sphereTexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, this.geometry.texCoords, gl.STATIC_DRAW);
@@ -109,12 +104,17 @@ class Player {
       gl.vertexAttribPointer(texLocation, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(texLocation);
       
-      // Buffer de índices
       const sphereIndexBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.geometry.indices, gl.STATIC_DRAW);
       
-      // Efetua o desenho da esfera
+      // Vincula a textura exclusiva do jogador
+      let samplerLoc = gl.getUniformLocation(shaderProgram, "uSampler");
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.texture);
+      gl.uniform1i(samplerLoc, 0);
+      
+      // Desenha a esfera
       gl.drawElements(gl.TRIANGLES, this.geometry.indices.length, gl.UNSIGNED_SHORT, 0);
     }
   }

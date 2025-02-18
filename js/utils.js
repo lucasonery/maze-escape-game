@@ -73,128 +73,119 @@ function compileShader(gl, shaderSource, shaderType) {
   }
   
   // Função para gerar os dados de um cubo com normais e coordenadas de textura
-  function createCube(size) {
-    const half = size / 2;
+  // js/utils.js
 
-    // Definindo vértices para cada face (cada face terá seus próprios vértices para garantir normais corretas)
-    const positions = [
-      // Frente
-      -half, -half,  half,
-       half, -half,  half,
-       half,  half,  half,
-      -half,  half,  half,
-      // Trás
-      -half, -half, -half,
-      -half,  half, -half,
-       half,  half, -half,
-       half, -half, -half,
-      // Topo
-      -half,  half, -half,
-      -half,  half,  half,
-       half,  half,  half,
-       half,  half, -half,
-      // Base
-      -half, -half, -half,
-       half, -half, -half,
-       half, -half,  half,
-      -half, -half,  half,
-      // Direito
-       half, -half, -half,
-       half,  half, -half,
-       half,  half,  half,
-       half, -half,  half,
-      // Esquerdo
-      -half, -half, -half,
-      -half, -half,  half,
-      -half,  half,  half,
-      -half,  half, -half,
-    ];
-
-    // Normais para cada face
-    const normals = [
-      // Frente (normal apontando para +Z)
-      0, 0, 1,
-      0, 0, 1,
-      0, 0, 1,
-      0, 0, 1,
-      // Trás (normal -Z)
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
-      0, 0, -1,
-      // Topo (normal +Y)
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0,
-      0, 1, 0,
-      // Base (normal -Y)
-      0, -1, 0,
-      0, -1, 0,
-      0, -1, 0,
-      0, -1, 0,
-      // Direito (normal +X)
-      1, 0, 0,
-      1, 0, 0,
-      1, 0, 0,
-      1, 0, 0,
-      // Esquerdo (normal -X)
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-    ];
-
-    // Coordenadas de textura para cada face (cada face: (0,0), (1,0), (1,1), (0,1))
-    const texCoords = [
-      // Frente
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-      // Trás
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-      // Topo
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-      // Base
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-      // Direito
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-      // Esquerdo
-      0, 0,
-      1, 0,
-      1, 1,
-      0, 1,
-    ];
-
-    // Índices para cada face (2 triângulos por face)
-    const indices = [
-      0, 1, 2,    0, 2, 3,     // Frente
-      4, 5, 6,    4, 6, 7,     // Trás
-      8, 9,10,    8,10,11,     // Topo
-     12,13,14,   12,14,15,     // Base
-     16,17,18,   16,18,19,     // Direito
-     20,21,22,   20,22,23      // Esquerdo
-    ];
-
-    return {
-      positions: new Float32Array(positions),
-      normals: new Float32Array(normals),
-      texCoords: new Float32Array(texCoords),
-      indices: new Uint16Array(indices)
-    };
-  }
+function createCube(size) {
+  const half = size / 2;
+  
+  const positions = [
+    // Front face (olhando para +Z)
+    -half, -half,  half,
+     half, -half,  half,
+     half,  half,  half,
+    -half,  half,  half,
+    
+    // Back face (olhando para -Z)
+    -half, -half, -half,
+    -half,  half, -half,
+     half,  half, -half,
+     half, -half, -half,
+    
+    // Top face (olhando para +Y)
+    -half,  half, -half,
+    -half,  half,  half,
+     half,  half,  half,
+     half,  half, -half,
+    
+    // Bottom face (olhando para -Y)
+    -half, -half, -half,
+     half, -half, -half,
+     half, -half,  half,
+    -half, -half,  half,
+    
+    // Right face (olhando para +X)
+     half, -half, -half,
+     half,  half, -half,
+     half,  half,  half,
+     half, -half,  half,
+    
+    // Left face (olhando para -X)
+    -half, -half, -half,
+    -half, -half,  half,
+    -half,  half,  half,
+    -half,  half, -half,
+  ];
+  
+  const normals = [
+    // Front
+    0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+    // Back
+    0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+    // Top
+    0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0,
+    // Bottom
+    0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+    // Right
+    1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+    // Left
+    -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+  ];
+  
+  // UVs ajustados para cada face:
+  const texCoords = [
+    // Front face: mapeamento padrão
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+    
+    // Back face: inverte horizontalmente para que a textura não fique "espelhada"
+    1, 0,
+    0, 0,
+    0, 1,
+    1, 1,
+    
+    // Top face: pode ser rotacionado se desejar
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+    
+    // Bottom face: similar à top (ou invertido se preferir)
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+    
+    // Right face: mapeamento padrão
+    0, 0,
+    1, 0,
+    1, 1,
+    0, 1,
+    
+    // Left face: inverte horizontalmente
+    1, 0,
+    0, 0,
+    0, 1,
+    1, 1,
+  ];
+  
+  const indices = [
+    0, 1, 2,   0, 2, 3,        // Front
+    4, 5, 6,   4, 6, 7,        // Back
+    8, 9, 10,  8, 10, 11,      // Top
+    12, 13, 14, 12, 14, 15,     // Bottom
+    16, 17, 18, 16, 18, 19,     // Right
+    20, 21, 22, 20, 22, 23      // Left
+  ];
+  
+  return {
+    positions: new Float32Array(positions),
+    normals: new Float32Array(normals),
+    texCoords: new Float32Array(texCoords),
+    indices: new Uint16Array(indices)
+  };
+}
 
   // Função para gerar os dados de um plano
   function createPlane(width, height) {
@@ -265,6 +256,8 @@ function compileShader(gl, shaderSource, shaderType) {
       // Se a imagem tiver dimensões potência de 2, gera mipmaps
       if ((image.width & (image.width - 1)) === 0 &&
           (image.height & (image.height - 1)) === 0) {
+        gl.textParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.textParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);        
         gl.generateMipmap(gl.TEXTURE_2D);
       } else {
         // Caso contrário, define parâmetros para evitar repetição
