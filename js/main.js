@@ -40,6 +40,29 @@ const uniformLocations = {
 const livesDisplay = document.getElementById("livesDisplay");
 const timerDisplay = document.getElementById("timerDisplay");
 
+// Criação dos Buffers do Cubo (paredes do labirinto)
+const cubeData = createCube(1);
+
+// 🔹 Criando o buffer de vértices do cubo
+const cubeVertexBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, cubeData.positions, gl.STATIC_DRAW);
+
+// 🔹 Criando o buffer de normais do cubo
+const cubeNormalBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, cubeNormalBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, cubeData.normals, gl.STATIC_DRAW);
+
+// 🔹 Criando o buffer de coordenadas UV do cubo
+const cubeTexCoordBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, cubeData.texCoords, gl.STATIC_DRAW);
+
+// 🔹 Criando o buffer de índices do cubo
+const cubeIndexBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndexBuffer);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cubeData.indices, gl.STATIC_DRAW);
+
 // Carrega a textura para as paredes do labirinto
 const wallTexture = loadTexture(gl, "assets/textures/wall.png");
 
@@ -112,7 +135,6 @@ gl.uniform1fv(uLightRadiiLoc, lightRadii);
 // ******************
 // Buffers e dados do cubo (paredes do labirinto)
 // ******************
-const cubeData = createCube(1);
 
 // Buffer de posições para as paredes
 const wallPositionBuffer = gl.createBuffer();
@@ -239,14 +261,20 @@ function renderMaze() {
     gl.enableVertexAttribArray(attribLocations.vertexPosition);
     
     // Vincula o buffer de índices e a textura
+    gl.bindBuffer(gl.ARRAY_BUFFER, wallNormalBuffer);
+    gl.vertexAttribPointer(attribLocations.vertexNormal,3,gl.FLOAT,false,0,0);
+    gl.enableVertexAttribArray(attribLocations.vertexNormal);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, wallTexCoordBuffer);
+    gl.vertexAttribPointer(attribLocations.textureCoord,2,gl.FLOAT,false,0,0);
+    gl.enableVertexAttribArray(attribLocations.textureCoord);
+
+    // Vincula o buffer de índices
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, wallTexture);
-    gl.uniform1i(uniformLocations.uSampler, 0);
-    
-    // Define uma direção de luz (exemplo simples)
-    // gl.uniform3fv(uniformLocations.lightPosition, [100, 100, 100]);
-    
+    // 🔹 Declara as variáveis ANTES de usá-las!
+    let vertexBufferSize = gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE);
+    let indexBufferSize = gl.getBufferParameter(gl.ELEMENT_ARRAY_BUFFER, gl.BUFFER_SIZE);
+
     // Desenha o cubo (paredes)
     gl.drawElements(gl.TRIANGLES, cubeData.indices.length, gl.UNSIGNED_SHORT, 0);
   });

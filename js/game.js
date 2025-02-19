@@ -11,6 +11,7 @@ class Game {
       this.player = player;
       this.lives = 3;
       this.gameOver = false;
+      this.startTime = Date.now();
       // Define a posição de saída do labirinto (ajuste conforme o layout desejado)
       this.exitPosition = [maze.grid[0].length - 2, 0.5, maze.grid.length - 2];
     }

@@ -102,7 +102,7 @@ function createCube(size) {
      half, -half, -half,
      half, -half,  half,
     -half, -half,  half,
-    
+
     // Right face (olhando para +X)
      half, -half, -half,
      half,  half, -half,
@@ -115,7 +115,7 @@ function createCube(size) {
     -half,  half,  half,
     -half,  half, -half,
   ];
-  
+
   const normals = [
     // Front
     0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
@@ -130,7 +130,7 @@ function createCube(size) {
     // Left
     -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
   ];
-  
+
   // UVs ajustados para cada face:
   const texCoords = [
     // Front face: mapeamento padrão
@@ -138,38 +138,38 @@ function createCube(size) {
     1, 0,
     1, 1,
     0, 1,
-    
+
     // Back face: inverte horizontalmente para que a textura não fique "espelhada"
     1, 0,
     0, 0,
     0, 1,
     1, 1,
-    
+
     // Top face: pode ser rotacionado se desejar
     0, 0,
     1, 0,
     1, 1,
     0, 1,
-    
+
     // Bottom face: similar à top (ou invertido se preferir)
     0, 0,
     1, 0,
     1, 1,
     0, 1,
-    
+
     // Right face: mapeamento padrão
     0, 0,
     1, 0,
     1, 1,
     0, 1,
-    
+
     // Left face: inverte horizontalmente
     1, 0,
     0, 0,
     0, 1,
     1, 1,
   ];
-  
+
   const indices = [
     0, 1, 2,   0, 2, 3,        // Front
     4, 5, 6,   4, 6, 7,        // Back
@@ -198,7 +198,7 @@ function createCube(size) {
        halfWidth, 0,  halfHeight,
       -halfWidth, 0,  halfHeight,
     ];
-    
+
     // Normais apontando para cima (eixo Y)
     const normals = [
       0, 1, 0,
@@ -214,13 +214,13 @@ function createCube(size) {
       1, 1,
       0, 1,
     ];
-    
+
     // Índices para os dois triângulos do plano
     const indices = [
       0, 1, 2,
       0, 2, 3
     ];
-    
+
     return {
       positions: new Float32Array(positions),
       normals: new Float32Array(normals),
@@ -230,7 +230,7 @@ function createCube(size) {
   }
 
 
-  
+
   // Função para carregar uma textura a partir de uma URL e configurá-la para uso no WebGL
   function loadTexture(gl, url) {
     const texture = gl.createTexture();
@@ -246,7 +246,7 @@ function createCube(size) {
     const srcType = gl.UNSIGNED_BYTE;
     const pixel = new Uint8Array([255, 255, 255, 255]);
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
-  
+
     // Carrega a imagem da textura
     const image = new Image();
     image.crossOrigin = "anonymous";
@@ -269,4 +269,3 @@ function createCube(size) {
     image.src = url;
     return texture;
   }
-  
