@@ -103,6 +103,9 @@ const floorHeight = maze.grid.length;
 // Atualizações para multiplas fontes de luz
 // ***************
 
+const uAmbientColorLoc = gl.getUniformLocation(shaderProgram, "uAmbientColor");
+gl.uniform3fv(uAmbientColorLoc, new Float32Array([0.3, 0.3, 0.3]));
+
 // uniforms para as luzes
 const uLightPositionsLoc = gl.getUniformLocation(shaderProgram, "uLightPositions");
 const uLightColorsLoc = gl.getUniformLocation(shaderProgram, "uLightColors");
@@ -206,43 +209,60 @@ function computeValidCameraPosition(playerPos, desiredPos, maze, cameraRadius) {
   return playerPos;
 }
 
+let cameraMode = "first";
+
+// Função para atualizar a câmera com base no modo atual
 function updateCamera() {
-  // Vetor padrão de offset: quando o jogador está com rotation = 0, a câmera fica 2 unidades atrás (no sentido +Z)
-  const defaultOffset = vec3.fromValues(0, 5, 10);
-  
-  // Cria uma matriz de rotação em torno do eixo Y, usando a rotação do jogador
+  let defaultOffset;
+  if (cameraMode === "first") {
+    // Modo "first": câmera atrás da esfera, offset [0, 0, 2]
+    defaultOffset = vec3.fromValues(0, 0.5, 1);
+  } else if (cameraMode === "overhead") {
+    // Modo "overhead": câmera acima e um pouco atrás da esfera, offset [0, 3, 2]
+    defaultOffset = vec3.fromValues(0, 2, 1);
+  } else {
+    // Valor padrão, se não estiver definido
+    defaultOffset = vec3.fromValues(0, 0.5, 1);
+  }
+
+  // Aplica a rotação do jogador ao vetor offset
   let rotationMatrix = mat4.create();
   mat4.fromYRotation(rotationMatrix, player.rotation);
   
-  // Aplica a rotação ao vetor offset
   let rotatedOffset = vec3.create();
   vec3.transformMat4(rotatedOffset, defaultOffset, rotationMatrix);
-
+  
   let desiredPos = vec3.create();
   vec3.add(desiredPos, player.position, rotatedOffset);
-
-  // Calcula uma posição válida para a câmera, evitando que ela fique dentro de paredes
+  
+  // Se desejar, você pode validar a posição da câmera para evitar que ela fique dentro de paredes:
   let validCameraPos = computeValidCameraPosition(player.position, desiredPos, maze, 0.2);
   
+  // Atualiza a matriz view para que a câmera olhe para o jogador
   mat4.lookAt(viewMatrix, validCameraPos, player.position, [0, 1, 0]);
 }
 
 
 // Evento de teclado para movimentar o jogador
 document.addEventListener("keydown", (event) => {
-  switch(event.key) {
-    case "ArrowUp":
-      player.move("up", maze);
-      break;
-    case "ArrowDown":
-      player.move("down", maze);
-      break;
-    case "ArrowLeft":
-      player.move("left", maze);
-      break;
-    case "ArrowRight":
-      player.move("right", maze);
-      break;
+  if (event.key === "c") {
+    cameraMode = (cameraMode === "first") ? "overhead" : "first";
+    console.log("Modo de câmera: " + cameraMode);
+  } else {
+    switch(event.key) {
+      case "ArrowUp":
+        player.move("up", maze);
+        break;
+      case "ArrowDown":
+        player.move("down", maze);
+        break;
+      case "ArrowLeft":
+        player.move("left", maze);
+        break;
+      case "ArrowRight":
+        player.move("right", maze);
+        break;
+    }
   }
 });
 
@@ -382,7 +402,7 @@ function render() {
       game.gameOver = true;
     } else {
       // Reinicia o jogador na entrada
-      player.position = [1, 0, 0];
+      player.position = [1, -0.15, 0];
     }
   }
   

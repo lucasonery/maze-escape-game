@@ -1,4 +1,3 @@
-// Dependências: js/maze.js, js/player.js
 // Descrição: Este script define a classe Game, responsável por gerenciar o estado do jogo.
 // O jogo é finalizado quando o jogador alcança a saída do labirinto.
 // O método update é chamado a cada frame para verificar se o jogador chegou à saída.
@@ -24,13 +23,14 @@ class Game {
       const distance = Math.sqrt(dx * dx + dz * dz);
       
       // Se o jogador estiver próximo o suficiente da saída, finaliza o jogo
-      if (distance < 0.5) {
+      if (distance < 0.2) {
         this.gameOver = true;
         alert("Parabéns! Você escapou do labirinto.");
       }
     }
     
     // Método para incrementar a pontuação (ex: ao coletar itens)
+    // TODO: Implementar um sistema de pontuação
     addScore(points) {
       this.score += points;
     }

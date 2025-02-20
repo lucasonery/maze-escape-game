@@ -1,7 +1,7 @@
 class Player {
     constructor() {
       // Posição inicial ajustada conforme o layout do labirinto
-      this.position = [1, 0, 0];
+      this.position = [1, -0.15, 0];
       // Velocidade de movimento
       this.speed = 0.1;
       // Rotação do jogador (em radianos)
@@ -10,7 +10,7 @@ class Player {
       this.rollAngle = 0;
       // Cria a geometria da esfera para representar o jogador
       // (Utilizando a função createSphere definida em utils.js)
-      this.geometry = createSphere(0.30, 20, 20);
+      this.geometry = createSphere(0.15, 20, 20);
     }
     
     // Método para mover o jogador, verificando colisões com o labirinto
@@ -29,8 +29,8 @@ class Player {
           this.position[2] + forward[2] * this.speed
         ];
         
-        // Verifica colisão com paredes usando o raio da esfera (0.5)
-        if (!maze.isColliding(newPos[0], newPos[2], 0.3)) {
+        // Verifica colisão com paredes usando o raio da esfera (0.2)
+        if (!maze.isColliding(newPos[0], newPos[2], 0.15)) {
           this.position = newPos;
           // atualiza o angulo de rolagem
           this.rollAngle -= this.speed / 0.5;
@@ -49,7 +49,7 @@ class Player {
           this.position[2] + backward[2] * this.speed
         ];
         
-        if (!maze.isColliding(newPos[0], newPos[2], 0.3)) {
+        if (!maze.isColliding(newPos[0], newPos[2], 0.15)) {
           this.position = newPos;
           // Para movimento para trás, o angulo de rolagem é negativo
           this.rollAngle += this.speed / 0.5;

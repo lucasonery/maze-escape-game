@@ -1,5 +1,3 @@
-// js/enemy.js
-
 class Enemy {
     constructor(gl, route) {
       this.gl = gl;
