@@ -37,8 +37,12 @@ const uniformLocations = {
   uSampler: gl.getUniformLocation(shaderProgram, "uSampler"),
 };
 
+// Obtenha os elementos do HUD e da tela de início
 const livesDisplay = document.getElementById("livesDisplay");
 const timerDisplay = document.getElementById("timerDisplay");
+
+// Inicia tempo 
+const startTime = Date.now();
 
 // Criação dos Buffers do Cubo (paredes do labirinto)
 const cubeData = createCube(1);
@@ -338,6 +342,7 @@ function renderPlayer() {
 
 // Loop principal de renderização
 function render() {
+  console.log("Renderizando...");
   updateCamera();
   gl.clearColor(0.1, 0.1, 0.1, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -346,12 +351,10 @@ function render() {
   // Atualiza o estado do jogo (verifica se o jogador chegou na saída)
   game.update();
 
-  // atualiza tempo (em segundos) e exibe no display
-  let elapsedSeconds = Math.floor((Date.now() - game.startTime) / 1000);
-
-  // atualiza HUD
-  livesDisplay.innerText = 'Vidas: ' + game.lives;
-  timerDisplay.innerText = 'Tempo: ' + elapsedSeconds + 's';
+  // Atualize o tempo decorrido
+  let elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+  timerDisplay.innerText = "Tempo: " + elapsedSeconds + "s";
+  livesDisplay.innerText = "Vidas: " + game.lives;
   
   // Renderiza o labirinto e o jogador
   renderFloor();
@@ -367,13 +370,18 @@ function render() {
   let dz = player.position[2] - enemy.position[2];
   let distance = Math.sqrt(dx * dx + dz * dz);
   // Supondo que ambos têm raio 0.5; colidem se a distância for menor que 1.0
-  if (distance < 1.0) {
+  if (distance < 1.0) { // colisão (supondo que cada esfera tem raio ~0.5)
     game.lives--;
     if (game.lives <= 0) {
-      alert("Game Over");
+      // Atualiza recorde, se for melhor
+      if (elapsedSeconds > highScore) {
+        highScore = elapsedSeconds;
+        localStorage.setItem('mazeHighScore', highScore);
+      }
+      alert("Game Over! Tempo: " + elapsedSeconds + "s");
       game.gameOver = true;
     } else {
-      // Reinicia o jogador à posição inicial (entrada do labirinto)
+      // Reinicia o jogador na entrada
       player.position = [1, 0, 0];
     }
   }
