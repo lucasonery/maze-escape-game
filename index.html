@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Maze Escape</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+</head>
+<body>
+  <!-- Cabeçalho do jogo (HUD) -->
+  <header id="gameHeader">
+    <div id="hudInfo">
+      <span id="gameName">Maze Escape</span>
+      <span id="instructions">Use as setas para se mover</span>
+      <span id="livesDisplay">Vidas: 3</span>
+      <span id="timerDisplay">Tempo: 0s</span>
+    </div>
+  </header>
+  
+  <!-- Container do Jogo -->
+  <div id="gameContainer">
+    <canvas id="glCanvas" width="800" height="500"></canvas>
+  </div>
+  
+  <!-- Shaders embutidos -->
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec3 aPosition;
+    attribute vec3 aNormal;
+    attribute vec2 aTexCoord;
+    
+    uniform mat4 uModelMatrix;
+    uniform mat4 uViewMatrix;
+    uniform mat4 uProjMatrix;
+    
+    varying vec3 vFragPos;
+    varying vec3 vNormal;
+    varying vec2 vTexCoord;
+    
+    void main() {
+      vec4 worldPos = uModelMatrix * vec4(aPosition, 1.0);
+      vFragPos = worldPos.xyz;
+      vNormal = mat3(uModelMatrix) * aNormal;
+      vTexCoord = aTexCoord;
+      gl_Position = uProjMatrix * uViewMatrix * worldPos;
+    }
+  </script>
+  
+  <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    varying vec3 vFragPos;
+    varying vec3 vNormal;
+    varying vec2 vTexCoord;
+    
+    uniform sampler2D uSampler;
+    
+    const int NUM_LIGHTS = 5;
+    uniform vec3 uLightPositions[NUM_LIGHTS];
+    uniform vec3 uLightColors[NUM_LIGHTS];
+    uniform float uLightRadii[NUM_LIGHTS];
+    uniform vec3 uAmbientColor;
+    
+    void main() {
+      vec3 norm = normalize(vNormal);
+      vec3 texColor = texture2D(uSampler, vTexCoord).rgb;
+      vec3 result = vec3(0.0);
+      
+      for (int i = 0; i < NUM_LIGHTS; i++) {
+        vec3 lightDir = uLightPositions[i] - vFragPos;
+        float distance = length(lightDir);
+        if (distance < uLightRadii[i]) {
+          lightDir = normalize(lightDir);
+          float attenuation = 1.0 - (distance / uLightRadii[i]);
+          float diff = max(dot(norm, lightDir), 0.0);
+          result += uLightColors[i] * diff * attenuation;
+        }
+      }
+      result += uAmbientColor;
+      gl_FragColor = vec4(texColor * result, 1.0);
+    }
+  </script>
+  
+  <!-- Inclusão dos arquivos JavaScript -->
+  <script src="js/utils.js"></script>
+  <script src="js/maze.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
